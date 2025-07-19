@@ -1,0 +1,9 @@
+﻿{
+  "name": "AtlyssPoise",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Decadence-666/AtlyssPoise",
+  "description": "Adds a poise stat to Atlyss that gives the ability to resist knockbacks",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}
