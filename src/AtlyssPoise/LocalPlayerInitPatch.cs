@@ -7,7 +7,7 @@ namespace AtlyssPoise;
 [HarmonyPatch(typeof(StatusEntity), "Start")]
 public class LocalPlayerInitPatch
 {
-    private static float _poiseMulti = 5f;
+    private static float _poiseMulti = 1.2f;
     static void Postfix(StatusEntity __instance)
     {
         if (__instance == null) return;
