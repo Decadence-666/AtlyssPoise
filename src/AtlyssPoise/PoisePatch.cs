@@ -12,7 +12,7 @@ public class PoisePatch
 
         var nb = __instance.GetComponent<NetworkBehaviour>();
         if (!__instance._isPlayer || !nb.isLocalPlayer || nb == null) return;
-        
+
         var poiseManager = __instance.GetComponent<PoiseManager>();
         if (poiseManager == null) return;
 
@@ -29,31 +29,26 @@ public class PoisePatch
         poiseManager.ApplyPoiseDamage(_dmgStruct._damageValue);
         Plugin.Log.LogInfo($"[Poise] after damage: {poiseManager.currentPoise}/{poiseManager.maxPoise}");
 
-        if (poiseManager.isBroken)
+        if (!poiseManager.isBroken)
         {
-            __instance._immuneToKnockback = false;
-            Plugin.Log.LogInfo("[Poise] broken! Partially reseting...");
-            poiseManager.HalfResetPoise();
+            // Suppress knockback
+            _dmgStruct._appliedForce = 0f;
+            Plugin.Log.LogInfo("[Poise] Suppressing knockback (poise intact).");
         }
         else
         {
-            // Suppress knockback
-            if (_dmgStruct._damageWeight == DamageWeight.Heavy || _dmgStruct._appliedForce > 10f)
-            {
-                _dmgStruct._appliedForce = 0f;
-                Plugin.Log.LogInfo("[Poise] Suppressing knockback (poise intact).");
-            }
-            
-            /* Another idea:
-             if (_dmgStruct._damageWeight == DamageWeight.Heavy)
-            {
-                Plugin.Log.LogInfo("[Poise] Heavy attacks bypass poise!");
-            }
-            else
-            {
-                _dmgStruct._appliedForce = 0f;
-                Plugin.Log.LogInfo("[Poise] Suppressing knockback (poise intact).");
-            }*/
+            Plugin.Log.LogInfo("[Poise] Poise broken! Knockback allowed");
         }
+
+        /* Another idea: (for heavy attacks to bypass poise)
+        if (_dmgStruct._damageWeight == DamageWeight.Heavy)
+        {
+            Plugin.Log.LogInfo("[Poise] Heavy attacks bypass poise!");
+        }
+        else
+        {
+            _dmgStruct._appliedForce = 0f;
+            Plugin.Log.LogInfo("[Poise] Suppressing knockback (poise intact).");
+        }*/
     }
 }

@@ -61,7 +61,7 @@ public class LocalPlayerInitPatch
         }
 
         var poiseManager = __instance.gameObject.AddComponent<PoiseManager>();
-        poiseManager.Initialize(poise, player, barBuilder);
+        poiseManager.Initialize(poise, barBuilder);
         barBuilder.SetPoisePercent(1f);
 
         Plugin.Log.LogInfo($"[Poise] Initialized after wait: {poiseManager.currentPoise}/{poiseManager.maxPoise}");

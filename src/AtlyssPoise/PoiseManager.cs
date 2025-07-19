@@ -1,33 +1,37 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace AtlyssPoise;
 
 public class PoiseManager : MonoBehaviour
 {
+    // Poise values and isBroken check
     public float maxPoise;
     public float currentPoise;
     public bool isBroken = false;
 
+    // Values for Poise regen
     private float _timeSinceDamaged = 0f;
     private float _regenRate;
     private float _regenDelay = 10f;
-    private float regenPercentage = 0.1f;
+    private float _regenPercentage = 0.1f;
     
-    private float logTimer = 0f;
-    private float logInterval = 1f;
-    private Player _player;
+    // Log
+    private float _logTimer = 0f;
+    private float _logInterval = 1f;
     private PoiseBarBuilder _poiseBarBuilder;
+    
+    private Coroutine _recoveryCoroutine;
 
-    public void Initialize(float poise, Player player, PoiseBarBuilder poiseBarBuilder)
+    public void Initialize(float poise, PoiseBarBuilder poiseBarBuilder)
     {
         maxPoise = poise;
         currentPoise = maxPoise;
-        _regenRate = maxPoise * regenPercentage;
-        _player = player;
+        _regenRate = maxPoise * _regenPercentage;
         _poiseBarBuilder = poiseBarBuilder;
     }
-
+    
     public void ApplyPoiseDamage(float damage)
     {
         if (isBroken) return;
@@ -41,6 +45,11 @@ public class PoiseManager : MonoBehaviour
         {
             currentPoise = 0;
             isBroken = true;
+            
+            // Delayed poise half-reset:
+            if (_recoveryCoroutine != null)
+                StopCoroutine(_recoveryCoroutine);
+            _recoveryCoroutine = StartCoroutine(DelayedHalfReset());
         }
     }
 
@@ -54,6 +63,12 @@ public class PoiseManager : MonoBehaviour
     {
         currentPoise = maxPoise / 2;
         isBroken = false;
+
+        if (_recoveryCoroutine != null)
+        {
+            StopCoroutine(_recoveryCoroutine);
+            _recoveryCoroutine = null;
+        }
     }
 
     private void Update()
@@ -72,12 +87,20 @@ public class PoiseManager : MonoBehaviour
         
         _poiseBarBuilder?.SetPoisePercent(currentPoise / maxPoise);
         
-        logTimer += Time.deltaTime;
-        if (logTimer >= logInterval && currentPoise < maxPoise)
+        _logTimer += Time.deltaTime;
+        if (_logTimer >= _logInterval && currentPoise < maxPoise)
         {
             Plugin.Log.LogInfo($"[Poise Regen] {currentPoise:F1}/{maxPoise}");
-            logTimer = 0f;
+            _logTimer = 0f;
         }
+    }
+    
+    private IEnumerator DelayedHalfReset()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        HalfResetPoise();
+        Plugin.Log.LogInfo("[Poise] Poise half reset in 0.5 seconds...");
     }
     
 }
